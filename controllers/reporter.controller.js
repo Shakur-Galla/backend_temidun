@@ -76,7 +76,7 @@ export const createReporter = async (req, res, next) => {
     res.cookie("temidun_token", token, {
       httpOnly: true, // Prevent JavaScript access
       secure: process.env.NODE_ENV === "production", // Use HTTPS in production
-      sameSite: NODE_ENV === "production" ? "none" : "lax", // Mitigate CSRF
+      sameSite: "none", // Mitigate CSRF
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
 

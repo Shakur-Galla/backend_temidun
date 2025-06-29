@@ -39,7 +39,7 @@ export const signUp = async (req, res, next) => {
     res.cookie("temidun_token", token, {
       httpOnly: true, // Prevent JavaScript access
       secure: process.env.NODE_ENV === "production", // Use HTTPS in production
-      sameSite: NODE_ENV === "production" ? "none" : "lax", // Mitigate 
+      sameSite: "none", // Mitigate 
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
 
@@ -99,7 +99,7 @@ export const signIn = async (req, res, next) => {
     res.cookie("temidun_token", token, {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: NODE_ENV === "production" ? "none" : "lax",
+  sameSite: "none",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 });
 
@@ -131,7 +131,7 @@ export const signOut = async (req, res, next) => {
     res.clearCookie("temidun_token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "none",
       path: "/"
     });
 
@@ -179,7 +179,7 @@ export const verifySession = async (req, res) => {
       res.clearCookie('temidun_token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: NODE_ENV === "production" ? "none" : "lax",
+        sameSite: "none",
       });
       
       return res.status(401).json({ 
@@ -200,7 +200,7 @@ export const verifySession = async (req, res) => {
     res.clearCookie('temidun_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "none",
     });
     
     if (error.name === 'TokenExpiredError') {
