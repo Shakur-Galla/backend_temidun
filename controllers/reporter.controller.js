@@ -75,7 +75,7 @@ export const createReporter = async (req, res, next) => {
     // Set JWT in HTTP-only cookie
     res.cookie("temidun_token", token, {
       httpOnly: true, // Prevent JavaScript access
-      secure: process.env.NODE_ENV === "production", // Use HTTPS in production
+      secure: NODE_ENV === "production", // Use HTTPS in production
       sameSite: "none", // Mitigate CSRF
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });

@@ -38,7 +38,7 @@ export const signUp = async (req, res, next) => {
     // Set JWT in HTTP-only cookie
     res.cookie("temidun_token", token, {
       httpOnly: true, // Prevent JavaScript access
-      secure: process.env.NODE_ENV === "production", // Use HTTPS in production
+      secure: NODE_ENV === "production", // Use HTTPS in production
       sameSite: "none", // Mitigate 
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
@@ -98,7 +98,7 @@ export const signIn = async (req, res, next) => {
 
     res.cookie("temidun_token", token, {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: NODE_ENV === "production",
   sameSite: "none",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 });
@@ -130,7 +130,7 @@ export const signOut = async (req, res, next) => {
     // Clear the httpOnly cookie by setting it to empty and expired
     res.clearCookie("temidun_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: NODE_ENV === "production",
       sameSite: "none",
       path: "/"
     });
@@ -157,7 +157,7 @@ export const verifySession = async (req, res) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     
     // Determine user model based on role
     let user;
@@ -178,7 +178,7 @@ export const verifySession = async (req, res) => {
       // Clear cookie if user not found
       res.clearCookie('temidun_token', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: NODE_ENV === "production",
         sameSite: "none",
       });
       
@@ -199,7 +199,7 @@ export const verifySession = async (req, res) => {
     // Clear cookie with same options as set
     res.clearCookie('temidun_token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: NODE_ENV === "production",
       sameSite: "none",
     });
     
