@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: temidun-backend
+    env: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: PORT
+        value: ""
+      - key: NODE_ENV
+        value: "production"
+      - key: DB_URI
+        value: ""
+      - key: JWT_SECRET
+        value: ""
+      - key: JWT_EXPIRES_IN
+        value: ""
+      - key: ARCJET_KEY
+        value: ""
+      - key: ARCJET_ENV
+        value: ""
+      - key: EMAIL_PASSWORD
+        value: ""
+      - key: EMAIL_USER
+        value: ""
+      - key: CLOUDINARY_CLOUD_NAME
+        value: ""
+      - key: CLOUDINARY_API_KEY
+        value: ""
+      - key: CLOUDINARY_API_SECRET
+        value: ""
+    autoDeploy: true
