@@ -4,7 +4,7 @@ import Reporter from "../models/reporter.model.js";
 import Monitor from "../models/monitor.model.js";
 import Report from "../models/report.model.js";
 import bcrypt from "bcryptjs";
-import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/env.js";
+import { JWT_EXPIRES_IN, JWT_SECRET,NODE_ENV } from "../config/env.js";
 
 export const createReporter = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -76,7 +76,7 @@ export const createReporter = async (req, res, next) => {
     res.cookie("temidun_token", token, {
       httpOnly: true, // Prevent JavaScript access
       secure: process.env.NODE_ENV === "production", // Use HTTPS in production
-      sameSite: "strict", // Mitigate CSRF
+      sameSite: NODE_ENV === "production" ? "none" : "lax", // Mitigate CSRF
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
 

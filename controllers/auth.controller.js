@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Monitor from "../models/monitor.model.js";
 import Reporter from "../models/reporter.model.js"
-import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/env.js";
+import { JWT_EXPIRES_IN, JWT_SECRET, NODE_ENV } from "../config/env.js";
 
 export const signUp = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -39,7 +39,7 @@ export const signUp = async (req, res, next) => {
     res.cookie("temidun_token", token, {
       httpOnly: true, // Prevent JavaScript access
       secure: process.env.NODE_ENV === "production", // Use HTTPS in production
-      sameSite: "strict", // Mitigate CSRF
+      sameSite: NODE_ENV === "production" ? "none" : "lax", // Mitigate 
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
 
@@ -99,7 +99,7 @@ export const signIn = async (req, res, next) => {
     res.cookie("temidun_token", token, {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
+  sameSite: NODE_ENV === "production" ? "none" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 });
 
@@ -131,7 +131,7 @@ export const signOut = async (req, res, next) => {
     res.clearCookie("temidun_token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: NODE_ENV === "production" ? "none" : "lax",
       path: "/"
     });
 
@@ -179,7 +179,7 @@ export const verifySession = async (req, res) => {
       res.clearCookie('temidun_token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: NODE_ENV === "production" ? "none" : "lax",
       });
       
       return res.status(401).json({ 
@@ -200,7 +200,7 @@ export const verifySession = async (req, res) => {
     res.clearCookie('temidun_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: NODE_ENV === "production" ? "none" : "lax",
     });
     
     if (error.name === 'TokenExpiredError') {

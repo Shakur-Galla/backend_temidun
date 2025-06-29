@@ -13,6 +13,7 @@ import errorMiddleware from "./middleware/error.middleware.js";
 const allowedOrigins = [
   "http://localhost:3000",
   "https://temidun.vercel.app",
+  "https://temidun.vercel.app/"
 ];
 
 const corsOptions = {
