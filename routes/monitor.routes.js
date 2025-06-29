@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getMonitor, getMonitors, inviteReporter, getReporterReports, getReporterReport, getReporterDetails } from "../controllers/monitor.controller.js";
+import { getMonitor, getMonitors, inviteReporter, getReporterReports, getReporterReport, getReporterDetails, getMonitorReporters } from "../controllers/monitor.controller.js";
 import { authorizeMonitor } from "../middleware/auth.middleware.js";
 
 const monitorRouter = Router()
@@ -30,5 +30,9 @@ monitorRouter.get('/reports/:reportId', authorizeMonitor, getReporterReport);
 
 //View reporter details
 monitorRouter.get('/reporters/:reporterId', authorizeMonitor, getReporterDetails);
+
+// Get reporters of a monitor
+monitorRouter.get("/:id/reporters", authorizeMonitor, getMonitorReporters);
+
 
 export default monitorRouter

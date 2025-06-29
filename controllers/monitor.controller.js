@@ -161,6 +161,26 @@ export const getReporterReports = async (req, res, next) => {
   }
 };
 
+export const getMonitorReporters = async (req, res, next) => {
+  try {
+    if (String(req.monitor._id) !== String(req.params.id)) {
+      const error = new Error('You do not have access to this account');
+      error.statusCode = 401;
+      throw error;
+    }
+
+    const reporters = await Reporter.find({ monitor: req.params.id }).populate({
+        path: 'reports',
+        select: '_id email taskSummary' 
+      })
+      .exec();
+
+    res.status(200).json({ success: true, data: reporters });
+  } catch (error) {
+    next(error);
+  }
+};
+
 //Get a reporter's report under a monitor
 export const getReporterReport = async (req, res, next) => {
   try {

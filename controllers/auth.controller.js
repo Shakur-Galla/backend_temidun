@@ -132,6 +132,7 @@ export const signOut = async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
+      path: "/"
     });
 
     res.status(200).json({
@@ -140,6 +141,87 @@ export const signOut = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const verifySession = async (req, res) => {
+  try {
+    // Get token from correct cookie name
+    const token = req.cookies.temidun_token;
+    
+    if (!token) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "No session token found" 
+      });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Determine user model based on role
+    let user;
+    if (decoded.role === 'monitor') {
+      user = await Monitor.findById(decoded.userId)
+        .select('-password -__v');
+    } else if (decoded.role === 'reporter') {
+      user = await Reporter.findById(decoded.userId)
+        .select('-password -__v');
+    } else {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid user role" 
+      });
+    }
+
+    if (!user) {
+      // Clear cookie if user not found
+      res.clearCookie('temidun_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+      
+      return res.status(401).json({ 
+        success: false, 
+        message: "User not found" 
+      });
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      user,
+      role: decoded.role
+    });
+  } catch (error) {
+    console.error("Session verification error:", error);
+    
+    // Clear cookie with same options as set
+    res.clearCookie('temidun_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Session expired. Please login again." 
+      });
+    }
+    
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid session token" 
+      });
+    }
+    
+    // Handle other potential errors
+    res.status(500).json({ 
+      success: false, 
+      message: "Internal server error" 
+    });
   }
 };
 

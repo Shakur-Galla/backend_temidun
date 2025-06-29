@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import { signIn,signOut,signUp } from '../controllers/auth.controller.js'
+import { signIn,signOut,signUp, verifySession } from '../controllers/auth.controller.js'
 
 const authRouter = Router()
 
@@ -12,5 +12,6 @@ authRouter.post('/sign-in', signIn)
 //Signout Monitor or Reporter
 authRouter.post('/sign-out', signOut)
 
+authRouter.get('/verify-session', verifySession)
 
 export default authRouter

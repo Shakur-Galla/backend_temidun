@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Report from "../models/report.model.js"
 import Reporter from "../models/reporter.model.js"
 import Monitor from "../models/monitor.model.js"
@@ -6,10 +7,15 @@ import { reportSubmittedTemplate } from "../utility/email-template.js";
 
 
 export const createReport = async (req, res, next) => {
+  const session = await mongoose.startSession();
   try {
+    session.startTransaction();
+
     const reporter = req.reporter;
 
     if (!reporter) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(403).json({
         success: false,
         message: "Unauthorized: Reporter not found in request",
@@ -22,11 +28,12 @@ export const createReport = async (req, res, next) => {
       videoUrl,
       audioUrl,
       supportRequest,
-      documents, // Array of { fileName, fileUrl, fileType, fileSize }
-      customFormResponses, // Optional
+      documents,
+      customFormResponses,
     } = req.body;
 
-    const report = await Report.create({
+    // Create report WITHIN the transaction
+    const [report] = await Report.create([{
       reporter: reporter._id,
       monitor: reporter.monitor,
       activities,
@@ -36,17 +43,21 @@ export const createReport = async (req, res, next) => {
       supportRequest,
       documents,
       customFormResponses,
-      date: new Date(), // Auto filled but overrideable for testing
-    });
+      date: new Date(),
+    }], { session }); // Pass session here
 
     // Link report to reporter
     await Reporter.findByIdAndUpdate(
       reporter._id,
-      { $push: { reports: report[0]._id } },
-      { session }
+      { $push: { reports: report._id } },
+      { session } // Maintain session consistency
     );
 
-    // Send email to monitor
+    // Commit transaction before external operations
+    await session.commitTransaction();
+    session.endSession();
+
+    // Send email (outside transaction)
     const monitor = await Monitor.findById(reporter.monitor);
     if (monitor?.email) {
       const emailHtml = reportSubmittedTemplate({
@@ -58,7 +69,7 @@ export const createReport = async (req, res, next) => {
         to: monitor.email,
         subject: "New Report Submitted",
         html: emailHtml,
-        text: `A new report has been submitted by ${reporter.fullName} on ${new Date().toLocaleString()}. Please log in to your dashboard to review it.`,
+        text: `A new report has been submitted by ${reporter.fullName} on ${new Date().toLocaleString()}.`,
       });
     }
 
@@ -68,6 +79,9 @@ export const createReport = async (req, res, next) => {
       data: report,
     });
   } catch (error) {
+    // Proper error handling with transaction rollback
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };
