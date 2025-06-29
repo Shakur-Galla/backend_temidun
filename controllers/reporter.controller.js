@@ -92,7 +92,7 @@ export const createReporter = async (req, res, next) => {
       success: true,
       message: "Reporter created successfully",
       data: {
-        token,
+
         reporter: reporterData,
       },
     });

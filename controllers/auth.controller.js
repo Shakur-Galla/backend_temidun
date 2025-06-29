@@ -52,7 +52,7 @@ export const signUp = async (req, res, next) => {
       message: "Monitor created successfully",
       data: {
         monitor: newMonitors[0],
-        token,
+        
       },
     });
   } catch (error) {
@@ -104,13 +104,13 @@ export const signIn = async (req, res, next) => {
 });
 
 
-    // Remove sensitive data from response
+
     const userResponse = {
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
-      token:token
-      // Add other non-sensitive fields as needed
+      
+
     };
 
     res.status(200).json({
