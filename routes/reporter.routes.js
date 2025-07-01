@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createReporter, getReporterReports } from "../controllers/reporter.controller.js";
+import { createReporter, getReporterReportById, getReporterReports } from "../controllers/reporter.controller.js";
 import { authorizeReporter } from "../middleware/auth.middleware.js";
 
 const reporterRoute = Router()
@@ -11,9 +11,7 @@ reporterRoute.post('/', createReporter)
 // Get all Reports of a Reporter
 reporterRoute.get('/:id', authorizeReporter, getReporterReports);
 
-reporterRoute.get('/:id', (req, res) =>{
-    res.send({title:'Get single Reporter'})
-})
+reporterRoute.get('/reports/:id', authorizeReporter ,getReporterReportById)
 
 reporterRoute.put('/:id', (req, res)=>{
     res.send({title:'Update a reporter'})

@@ -1,11 +1,15 @@
 import { Router } from "express";
 import { createReport, getReporterReports } from "../controllers/report.controller.js";
 import { authorizeReporter } from "../middleware/auth.middleware.js";
+import upload from "../middleware/multer.middleware.js";
 
 const reportRouter = Router();
 
 // Create Report
-reportRouter.post('/',authorizeReporter ,createReport);
+reportRouter.post('/',authorizeReporter ,  upload.fields([
+  { name: "video", maxCount: 1 },
+  { name: "audio", maxCount: 1 },
+]),createReport);
 
 // Get All Reports (global/admin usage — optional)
 reportRouter.get('/', (req, res) => {

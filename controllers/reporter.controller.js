@@ -52,6 +52,7 @@ export const createReporter = async (req, res, next) => {
     const reporter = await Reporter.create(
       [
         {
+          fullName,
           email,
           password: hashedPassword,
           monitor: monitor._id,
@@ -123,3 +124,46 @@ export const getReporterReports = async (req, res, next) => {
     next(error);
   }
 };
+
+
+
+export const getReporterReportById = async (req, res, next) => {
+  try {
+    const { id: reportId } = req.params;
+    const reporterFromToken = req.reporter;
+
+    if (!reporterFromToken) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized: Reporter not found in request",
+      });
+    }
+
+    const report = await Report.findById(reportId)
+      .populate("reporter", "fullName email")
+      .select("-__v")
+      .lean();
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: "Report not found",
+      });
+    }
+
+    if (report.reporter._id.toString() !== reporterFromToken._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access to this report",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
