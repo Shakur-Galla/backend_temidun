@@ -170,38 +170,46 @@ export const getMonitorReporters = async (req, res, next) => {
     }
 
     const reporters = await Reporter.find({ monitor: req.params.id }).populate({
-        path: 'reports',
-        select: '_id email taskSummary' 
-      })
-      .exec();
+      path: 'reports',
+      select: '_id tasksCompleted date status'
+    });
 
     res.status(200).json({ success: true, data: reporters });
   } catch (error) {
     next(error);
   }
 };
+ 
 
 //Get a reporter's report under a monitor
 export const getReporterReport = async (req, res, next) => {
   try {
-    const { monitor } = req;
+    const monitorFromToken = req.monitor;
     const { reportId } = req.params;
 
-    const report = await Report.findById(reportId).populate({
-      path: 'reporter',
-      select: 'fullName email',
-    });
-
-    if (!report) {
-      const error = new Error('Report not found');
-      error.statusCode = 404;
-      throw error;
+    if (!monitorFromToken) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized: Monitor not found in request",
+      });
     }
 
-    if (report.monitor.toString() !== monitor.id) {
-      const error = new Error('You are not authorized to view this report');
-      error.statusCode = 403;
-      throw error;
+    const report = await Report.findById(reportId)
+      .populate("reporter", "fullName email") // Optional: populate monitor too
+      .lean();
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: "Report not found",
+      });
+    }
+
+    if (report.monitor.toString() !== monitorFromToken._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to view this report",
+      });
     }
 
     res.status(200).json({
@@ -213,29 +221,37 @@ export const getReporterReport = async (req, res, next) => {
   }
 };
 
-export const getReporterDetails = async (req, res, next) => {  
+export const getReporterDetails = async (req, res, next) => {
   try {
-    const { monitor } = req; // monitor injected by authorize middleware
+    const monitorFromToken = req.monitor;
     const { reporterId } = req.params;
 
-    // Fetch reporter and include associated reports
-    const reporter = await Reporter.findById(reporterId)
-      .populate({
-        path: 'reports',
-        options: { sort: { date: -1 } }, // optional: sort reports by date
+    if (!monitorFromToken) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized: Monitor not found in request",
       });
-
-    if (!reporter) {
-      const error = new Error('Reporter not found');
-      error.statusCode = 404;
-      throw error;
     }
 
-    // 
-    if (reporter.monitor.toString() !== monitor.id) {
-      const error = new Error('You are not authorized to view this reporter');
-      error.statusCode = 403;
-      throw error;
+    const reporter = await Reporter.findById(reporterId)
+      .populate({
+        path: "reports",
+        options: { sort: { date: -1 } },
+      })
+      .lean();
+
+    if (!reporter) {
+      return res.status(404).json({
+        success: false,
+        message: "Reporter not found",
+      });
+    }
+
+    if (reporter.monitor.toString() !== monitorFromToken._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to view this reporter",
+      });
     }
 
     res.status(200).json({
@@ -245,4 +261,4 @@ export const getReporterDetails = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+}; 
